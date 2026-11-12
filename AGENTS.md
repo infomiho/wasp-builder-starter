@@ -74,5 +74,5 @@ Run the `review` skill (`.claude/skills/review/SKILL.md`) on your change and fix
 
 ## Documentation
 
-- Wasp: fetch the [llms.txt index](https://wasp.sh/llms.txt) and read the pages for the task. This app uses Wasp 0.26 with a TypeScript spec (`main.wasp.ts`).
+- Wasp: this app uses Wasp 0.26 with a TypeScript spec (`main.wasp.ts` and `<feature>.wasp.ts`), not the older `main.wasp` language. Read the `wasp` skill (`.claude/skills/wasp/SKILL.md`) before you declare anything in a `*.wasp.ts` file, write an operation, touch auth, or when the app fails to start. It names the exact documentation page to fetch for anything it does not cover.
 - Open SaaS: fetch the [llms.txt index](https://docs.opensaas.sh/llms.txt) and the raw.githubusercontent.com guide URLs it lists. Its guides describe the full template, so check the building block skill for how a feature fits this smaller app.
