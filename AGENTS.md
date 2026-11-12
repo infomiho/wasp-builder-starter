@@ -9,7 +9,7 @@ A small full-stack app on [Wasp](https://wasp.sh) 0.26 (React, Node.js, Prisma, 
 - **Small, focused changes.** Do what was asked, in the files it needs. Leave unrelated code as it is, and remove anything your change made unused: imports, files, routes, dependencies.
 - **Build from the UI kit and the theme.** Compose pages from `src/client/components/ui` (shadcn/ui) and `lucide-react` icons. Color with the theme tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `bg-primary`, `border-border`, `bg-muted`, `text-destructive`) so light and dark mode both work. A hardcoded color (`bg-white`, `text-gray-900`, hex values) breaks dark mode.
 - **Dependencies are a last resort.** Use what `package.json` already has. When a package is truly needed, add it to `package.json` and explain why. `.npmrc` only accepts versions published at least 7 days ago.
-- **Secrets never block the app.** Read them with `env` from `wasp/server`. When one is missing, the feature still loads and tells the person in plain words what to set up, and the rest of the app keeps working. Keep secrets out of code and out of committed files: they live in the platform's environment settings, or in `.env.server`, which git ignores.
+- **Secrets never block the app.** Declare each one as optional in the zod schema in `src/env.ts`, registered in `main.wasp.ts` as `server: { envValidationSchema }` (the building block skills show how), and read it with `env` from `wasp/server`. When one is missing, the feature still loads and tells the person in plain words what to set up, and the rest of the app keeps working. Keep secrets out of code and out of committed files: they live in the platform's environment settings, or in `.env.server`, which git ignores.
 - **Write for the person.** Interface text is short, plain and in sentence case. Every list has a loading, an empty and an error state.
 - **Off limits:** `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.github/`, `migrations/`, `.wasp/`, `package-lock.json`.
 
@@ -29,6 +29,7 @@ A small full-stack app on [Wasp](https://wasp.sh) 0.26 (React, Node.js, Prisma, 
 | `src/user/` | Account page and the user menu (`constants.ts` lists its links) |
 | `src/notes/` | The example feature, a complete Wasp pattern to copy |
 | `src/server/validation.ts` | `ensureArgsSchemaOrThrowHttpError` for validating operation input |
+| `src/shared/format.ts` | `formatDate` and `formatDateTime` for showing dates |
 | `src/server/scripts/dbSeeds.ts` | Demo data created by the seed |
 
 Each feature lives in its own folder with a `<feature>.wasp.ts` spec that `main.wasp.ts` lists in `spec: [...]`.

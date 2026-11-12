@@ -17,6 +17,7 @@ const demoNotes = [
  * This function, which we've imported in `app.db.seeds` in the `main.wasp.ts` file,
  * creates the demo user and their notes via the `wasp db seed` command.
  * It does nothing when the demo user already exists, so it is safe to run more than once.
+ * The demo password is public, so never run it against a production database.
  * For more info see: https://wasp.sh/docs/data/databases#seeding-the-database
  */
 export async function seedDemoUser(prismaClient: PrismaClient) {

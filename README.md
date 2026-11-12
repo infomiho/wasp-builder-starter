@@ -14,7 +14,7 @@ wasp db seed           # creates the demo user
 wasp start             # http://localhost:3000
 ```
 
-Demo login: username `demo`, password `demo12345`.
+Demo login: username `demo`, password `demo12345`. The seed is for development databases only: never run it against production.
 
 ## Building blocks
 

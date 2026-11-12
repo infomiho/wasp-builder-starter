@@ -1,7 +1,7 @@
 import { Moon, Sun } from "lucide-react";
-import { Label } from "../../client/components/ui/label";
 import { useColorMode } from "../hooks/useColorMode";
 import { cn } from "../utils";
+import { Label } from "./ui/label";
 
 export function DarkModeSwitcher() {
   const [colorMode, setColorMode] = useColorMode();
@@ -9,14 +9,11 @@ export function DarkModeSwitcher() {
 
   return (
     <div>
-      <Label
-        className={cn(
-          "bg-muted h-7.5 has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background relative m-0 block w-14 cursor-pointer rounded-full transition-colors duration-300 ease-in-out",
-        )}
-      >
+      <Label className="bg-muted h-7.5 has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background relative m-0 block w-14 cursor-pointer rounded-full transition-colors duration-300 ease-in-out">
         <input
           type="checkbox"
-          aria-label="Toggle dark mode"
+          role="switch"
+          aria-label="Dark mode"
           checked={!isInLightMode}
           onChange={() => setColorMode(isInLightMode ? "dark" : "light")}
           className="absolute top-0 z-50 m-0 h-full w-full cursor-pointer opacity-0"

@@ -1,5 +1,5 @@
 import { defineUserSignupFields } from "wasp/auth/providers/types";
-import { z } from "zod";
+import * as z from "zod";
 
 const usernameDataSchema = z.object({
   username: z.string(),

@@ -3,13 +3,6 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Link as ReactRouterLink } from "react-router";
 import { useAuth } from "wasp/client/auth";
 import { Link as WaspRouterLink, routes } from "wasp/client/router";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "../../../client/components/ui/sheet";
 import { APP_NAME } from "../../../shared/common";
 import { throttleWithTrailingInvocation } from "../../../shared/utils";
 import { UserDropdown } from "../../../user/UserDropdown";
@@ -17,6 +10,13 @@ import { UserMenuItems } from "../../../user/UserMenuItems";
 import logo from "../../static/logo.svg";
 import { cn } from "../../utils";
 import { DarkModeSwitcher } from "../DarkModeSwitcher";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet";
 
 export interface NavigationItem {
   name: string;
@@ -112,9 +112,7 @@ function NavBarDesktopUserDropdown({ isScrolled }: { isScrolled: boolean }) {
 
   return (
     <div className="hidden items-center justify-end gap-3 lg:flex lg:flex-1">
-      <ul className="flex items-center justify-center gap-2 sm:gap-4">
-        <DarkModeSwitcher />
-      </ul>
+      <DarkModeSwitcher />
       {isUserLoading ? null : !user ? (
         <WaspRouterLink
           to={routes.LoginRoute.to}

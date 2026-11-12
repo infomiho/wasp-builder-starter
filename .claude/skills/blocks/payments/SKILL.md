@@ -131,10 +131,11 @@ The platform generates and applies the migration.
 ## 6. Spec, dependency, account page and navigation
 
 - `main.wasp.ts`: `import { paymentSpec } from "./src/payment/payment.wasp";` and add `paymentSpec` to `spec: [...]`. It declares `/pricing` (`PricingPageRoute`, prerendered), `/checkout` (`CheckoutResultRoute`), the checkout and portal operations and the `POST /payments-webhook` API.
-- `package.json` dependencies: `"stripe": "18.1.0"`.
+- `package.json` dependencies: `"stripe": "18.1.0"`, and in `devDependencies` `"@types/express": "^5.0.0"`, because `stripe/webhook.ts` imports `express`.
 - `src/user/AccountPage.tsx`: add "Plan" and "Credits" rows using the `UserCurrentSubscriptionPlan`, `CustomerPortalButton` and `BuyMoreButton` pieces of `src/user/AccountPage.tsx` at the tag, rendered as `AccountDetail` rows in this starter's style. Label them in sentence case.
 - `src/client/components/NavBar/NavBar.tsx` and `constants.ts`: show `{ name: "Pricing", to: routes.PricingPageRoute.to }` to everyone, signed in or not.
-- Rewrite the plan cards in `PricingPage.tsx` (`paymentPlanCards`) with the person's plan names, prices and features, and keep `prettyPaymentPlanName` in `plans.ts` in sync.
+- Rewrite the plan cards in `PricingPage.tsx` (`paymentPlanCards`) with the person's plan names, prices and features, and keep `prettyPaymentPlanName` in `plans.ts` in sync. Rewrite the intro under the heading, which talks about choosing a payment processor and shows a test card number, and the customer portal error messages, which show the user's id.
+- `PricingPage.tsx` calls `useQuery(getCustomerPortalUrl, { enabled: isUserSubscribed })`, which passes the options as the query's arguments, so signed-out visitors get a 401 in the console. Change it to `useQuery(getCustomerPortalUrl, undefined, { enabled: isUserSubscribed })`.
 
 ## 7. Verify
 

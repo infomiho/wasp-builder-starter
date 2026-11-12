@@ -68,7 +68,7 @@ To link visitors to sections, give each section an `id` and list it in `src/clie
 export const marketingNavigationItems: NavigationItem[] = [
   { name: "Features", to: "/#features" },
   { name: "FAQ", to: "/#faq" },
-] as const;
+];
 ```
 
 In `src/client/components/NavBar/NavBar.tsx`, show them to signed-out visitors by changing `const visibleNavigationItems = user ? navigationItems : [];` to `user ? navigationItems : marketingNavigationItems` (and import it). `App.tsx` already scrolls to the `#id` in the address.

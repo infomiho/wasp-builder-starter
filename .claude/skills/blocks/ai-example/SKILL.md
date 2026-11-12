@@ -126,7 +126,7 @@ The platform generates and applies the migration.
 - `main.wasp.ts`: `import { demoAiAppSpec } from "./src/demo-ai-app/demo-ai-app.wasp";` and add `demoAiAppSpec` to `spec: [...]`. It declares the `/demo-app` route (`DemoAppRoute`), the task operations and `generateGptResponse`.
 - `package.json` dependencies: `"openai": "^6.27.0"`.
 - `src/client/components/NavBar/constants.ts`: add `{ name: "AI planner", to: routes.DemoAppRoute.to }`.
-- The model is set in `generateScheduleWithGpt` (`model: "gpt-6-luna"`). Keep it unless the person asks for another.
+- `generateScheduleWithGpt` sets `model: "gpt-3.5-turbo"` at the tag. Change it to `model: "gpt-6-luna"` unless the person asks for another, and drop the comment after it.
 
 ## 7. Verify
 

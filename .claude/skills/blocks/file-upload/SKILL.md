@@ -27,7 +27,7 @@ curl -fsSL "https://raw.githubusercontent.com/wasp-lang/open-saas/wasp-v0.26-tem
 
 Fetch into `src/file-upload/`, keeping the same paths: `file-upload.wasp.ts`, `FileUploadPage.tsx`, `fileUploading.ts`, `operations.ts`, `s3Utils.ts`, `validation.ts`, `env.ts`.
 
-Set the accepted types and size in `validation.ts` (`ALLOWED_FILE_TYPES`, `MAX_FILE_SIZE_BYTES`) to what the person needs, for example only images.
+Set the accepted types and size in `validation.ts` (`ALLOWED_FILE_TYPES`, `MAX_FILE_SIZE_BYTES`) to what the person needs, for example only images. List exact types such as `text/plain`: a wildcard like the tag's `text/*` never matches a file's type, so those files are rejected.
 
 ## 2. Make the keys optional
 
@@ -56,6 +56,10 @@ In Open SaaS the server refuses to start without the keys. Here it must start.
    export const FILE_UPLOADS_NOT_SET_UP_MESSAGE =
      "File uploads aren't set up yet. Connect an S3 bucket to turn them on.";
 
+   export function areFileUploadsSetUp(): boolean {
+     return Boolean(env.AWS_S3_REGION && env.AWS_S3_IAM_ACCESS_KEY && env.AWS_S3_IAM_SECRET_KEY && env.AWS_S3_FILES_BUCKET);
+   }
+
    function getS3Settings() {
      const { AWS_S3_REGION, AWS_S3_IAM_ACCESS_KEY, AWS_S3_IAM_SECRET_KEY, AWS_S3_FILES_BUCKET } = env;
      if (!AWS_S3_REGION || !AWS_S3_IAM_ACCESS_KEY || !AWS_S3_IAM_SECRET_KEY || !AWS_S3_FILES_BUCKET) {
@@ -67,22 +71,26 @@ In Open SaaS the server refuses to start without the keys. Here it must start.
      });
      return { client, bucket: AWS_S3_FILES_BUCKET };
    }
-
-   export function areFileUploadsSetUp(): boolean {
-     return Boolean(env.AWS_S3_REGION && env.AWS_S3_IAM_ACCESS_KEY && env.AWS_S3_IAM_SECRET_KEY && env.AWS_S3_FILES_BUCKET);
-   }
    ```
 
    Import `HttpError` from `wasp/server`.
 4. Add a query `getFileUploadsStatus` to `operations.ts` that checks `context.user` and returns `{ isSetUp: areFileUploadsSetUp() }`, and declare it in `file-upload.wasp.ts` with `query(getFileUploadsStatus, { entities: [] })`.
 5. In `FileUploadPage.tsx`, read it with `useQuery(getFileUploadsStatus)`. When `isSetUp` is false, render an `Alert` from the UI kit with `FILE_UPLOADS_NOT_SET_UP_MESSAGE`'s text in place of the upload form, and keep the file list.
 
-## 3. Adapt the page
+## 3. Close the access gaps
+
+The operations at the tag let people reach files that are not theirs. In `operations.ts`:
+
+- `getDownloadFileSignedURL` has no checks at all. Add `context` to its parameters, throw `HttpError(401)` without `context.user`, and throw `HttpError(404)` unless `context.entities.File.findFirst({ where: { s3Key, userId: context.user.id } })` finds the file.
+- `addFileToDb` accepts any `s3Key`. Throw `HttpError(403)` unless it starts with `` `${context.user.id}/` ``, the prefix `getS3Key` in `s3Utils.ts` gives every upload.
+
+## 4. Adapt the page
 
 - Rewrite the intro ("This is an example file upload page using AWS S3...") for the person, for example "Upload files and find them here later.", and put headings and buttons in sentence case.
 - The list needs loading, empty ("No files yet") and error states.
+- The effect that calls `allUserFiles.refetch()` lists `[allUserFiles]` as its dependencies. That object changes after every fetch, so the list refetches without end. Depend on `allUserFiles.refetch` instead.
 
-## 4. Schema
+## 5. Schema
 
 Add to `schema.prisma`, and `files File[]` to `User`:
 
@@ -102,15 +110,15 @@ model File {
 
 The platform generates and applies the migration.
 
-## 5. Spec, dependencies and navigation
+## 6. Spec, dependencies and navigation
 
 - `main.wasp.ts`: `import { fileUploadSpec } from "./src/file-upload/file-upload.wasp";` and add `fileUploadSpec` to `spec: [...]`. It declares `/file-upload` (`FileUploadRoute`) and the file operations.
 - `package.json` dependencies: `"@aws-sdk/client-s3": "^3.523.0"`, `"@aws-sdk/s3-presigned-post": "^3.750.0"`, `"@aws-sdk/s3-request-presigner": "^3.523.0"`, `"ky": "^2.0.0"`.
 - `src/client/components/NavBar/constants.ts`: add `{ name: "Files", to: routes.FileUploadRoute.to }`.
 
-## 6. Verify
+## 7. Verify
 
 1. `npx tsc -p tsconfig.src.json --noEmit` passes.
 2. Without the AWS variables, the server starts and the files page shows the not-set-up message with an empty list.
-3. With a bucket, uploading shows progress, the file appears in the list, and download and delete work.
+3. With a bucket, uploading shows progress, the file appears in the list, and download and delete work. The network tab shows one `getAllFilesByUser` request per page load or upload, not a steady stream.
 4. Check the page in light and dark mode at desktop and phone widths, with no browser console errors.
