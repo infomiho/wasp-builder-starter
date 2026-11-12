@@ -12,7 +12,7 @@ import { APP_NAME } from "./src/shared/common";
 import { userSpec } from "./src/user/user.wasp";
 
 export default app({
-  name: "OpenSaaS",
+  name: "MyApp",
   wasp: { version: "^0.26.1" },
   title: APP_NAME,
   head,
