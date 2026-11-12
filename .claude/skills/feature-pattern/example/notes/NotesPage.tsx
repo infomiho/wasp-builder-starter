@@ -1,6 +1,6 @@
-import { AlertCircle, Loader2, NotebookPen } from "lucide-react";
+import { AlertCircle, Loader2, NotebookPen, Trash2 } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
-import { createNote, getNotes, useQuery } from "wasp/client/operations";
+import { createNote, deleteNote, getNotes, useQuery } from "wasp/client/operations";
 import { type Note } from "wasp/entities";
 import * as z from "zod";
 import { Alert, AlertDescription } from "../client/components/ui/alert";
@@ -15,6 +15,7 @@ import { createNoteInputSchema, NOTE_CONTENT_MAX_LENGTH, NOTE_TITLE_MAX_LENGTH }
 
 const TITLE_ERROR_ID = "note-title-error";
 const UNKNOWN_SAVE_ERROR = "Unable to save the note. Check your connection and try again.";
+const UNKNOWN_DELETE_ERROR = "Unable to delete the note. Check your connection and try again.";
 
 export function NotesPage() {
   return (
@@ -134,10 +135,38 @@ function NoteList() {
 }
 
 function NoteCard({ note }: { note: Note }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    try {
+      await deleteNote({ id: note.id });
+      toast({ title: "Note deleted" });
+    } catch (error) {
+      toast({
+        title: "Couldn't delete the note",
+        description: error instanceof Error ? error.message : UNKNOWN_DELETE_ERROR,
+        variant: "destructive",
+      });
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <Card>
       <CardContent className="space-y-1 p-6">
-        <h3 className="text-foreground font-semibold">{note.title}</h3>
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="text-foreground font-semibold">{note.title}</h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={isDeleting}
+            onClick={handleDelete}
+            aria-label={`Delete the note "${note.title}"`}
+          >
+            {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 aria-hidden="true" />}
+          </Button>
+        </div>
         {note.content && (
           <p className="text-muted-foreground whitespace-pre-line text-pretty text-sm leading-6">{note.content}</p>
         )}

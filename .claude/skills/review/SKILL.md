@@ -33,6 +33,7 @@ Read every changed line against each rule below. A rule passes only when you hav
 
 **Data**
 - Every `schema.prisma` change is one the platform's generated migration can apply to a database with rows: new fields on existing models are optional or have a default, and relations have both sides.
+- Every new model's id is `String @id @default(uuid())`, every foreign key is a `String`, and every id an operation receives is validated with `z.uuid()`.
 - Each new entity is listed in the `entities` of every operation that uses it.
 
 **UI**

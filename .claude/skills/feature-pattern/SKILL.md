@@ -9,10 +9,10 @@ description: The pattern for a feature that stores data in this Wasp app, with a
 
 | Example file | What to take from it |
 | --- | --- |
-| `validation.ts` | One zod schema per action input, with length limits as constants and messages written for the person. The server and the form both use it |
-| `operations.ts` | Each operation checks `context.user`, validates through `ensureArgsSchemaOrThrowHttpError` and touches only the signed-in user's rows |
+| `validation.ts` | One zod schema per action input, with length limits as constants and messages written for the person. The server and the form both use it. An id is validated with `z.uuid()` |
+| `operations.ts` | Each operation checks `context.user`, validates through `ensureArgsSchemaOrThrowHttpError` and touches only the signed-in user's rows. `deleteNote` shows an operation on one row |
 | `notes.wasp.ts` | The feature spec: one route with `authRequired: true`, and each operation with the entities it uses |
-| `NotesPage.tsx` | A form that checks input before calling the action and shows each message under its field, and a list with loading, empty and error states |
+| `NotesPage.tsx` | A form that checks input before calling the action and shows each message under its field, and a list with loading, empty and error states, where each row has a delete button |
 
 ## 1. Model
 
@@ -36,11 +36,11 @@ model Note {
 }
 ```
 
-The platform generates and applies the migration.
+Keep the id a UUID and `userId` a `String` in every model (`AGENTS.md`, under Ground rules, has the reason). The platform generates and applies the migration.
 
 ## 2. Validation, operations and spec
 
-Copy `validation.ts`, `operations.ts` and `notes.wasp.ts` (as `<feature>.wasp.ts`) and reshape them for your model: its fields, its limits, its messages. Add an operation for each thing the person can do (edit, delete, mark as done), in the same shape as `createNote`. An operation that changes one row finds it by both its `id` and `userId: context.user.id`, so nobody can change another person's rows.
+Copy `validation.ts`, `operations.ts` and `notes.wasp.ts` (as `<feature>.wasp.ts`) and reshape them for your model: its fields, its limits, its messages. Add an operation for each thing the person can do (edit, mark as done), in the same shape as `createNote` and `deleteNote`. An operation on one row validates its `id` with `z.uuid()` and finds the row by both its `id` and `userId: context.user.id`, like `deleteNote`, so nobody can change another person's rows.
 
 In `main.wasp.ts`, import the spec and add it to `spec: [...]`:
 
@@ -51,6 +51,8 @@ import { notesSpec } from "./src/notes/notes.wasp";
 ## 3. Page
 
 Copy `NotesPage.tsx` and reshape it for your model. Keep all of its states: the saving button, the message under an invalid field, the server's error message, and the list's loading, empty and error states. Rewrite every piece of interface text for the person's app.
+
+A page for one row carries the row's id in its address: declare `route("NoteRoute", "/notes/:id", page(NotePage, { authRequired: true }))`, link to it with `<Link to="/notes/:id" params={{ id: note.id }}>` from `wasp/client/router`, read the id with `useParams` from `react-router`, and pass it to a query that validates it with `z.uuid()` and answers `HttpError(404)` when the signed-in user has no such row.
 
 ## 4. Navigation
 
@@ -96,4 +98,4 @@ The seed skips a demo user that already exists, so these rows reach only databas
 
 1. `grep -ri "note" src/<feature> main.wasp.ts schema.prisma src/server/scripts/dbSeeds.ts src/client/components/NavBar` finds nothing, unless the app really is about notes.
 2. `npx tsc -p tsconfig.src.json --noEmit` passes.
-3. In the preview, signed in: the page opens from the navigation, an empty form shows its message under the field, a valid one adds a row to the list, and a new account sees the empty state.
+3. In the preview, signed in: the page opens from the navigation, an empty form shows its message under the field, a valid one adds a row to the list, the delete button removes it, and a new account sees the empty state.

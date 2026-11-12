@@ -57,7 +57,46 @@ The stats job feeds the admin dashboard's overview page. Add it together with th
 
 3. **Skip the run without keys.** At the top of `calculateDailyStatsJob` in `stats.ts`, return early when the provider's variables are missing, with one `console.log("Analytics isn't set up yet, skipping the daily stats.")`. `googleAnalyticsUtils.ts` builds its client when it loads, so move that construction into a function called inside the job.
 4. **Revenue belongs to payments.** Without the `payments` block, remove the `paymentProcessor` and `SubscriptionStatus` imports from `stats.ts`, set `paidUserCount` and `totalRevenue` to `0`, and drop the paid-user query.
-5. **Schema.** Add these models from `schema.prisma` at the tag, unchanged: `DailyStats`, `PageViewSource` and `Logs`.
+5. **Schema.** Add these models to `schema.prisma`. They are the tag's `DailyStats`, `PageViewSource` and `Logs` with UUID ids, where the tag has autoincrementing integers:
+
+   ```prisma
+   model DailyStats {
+     id                               String          @id @default(uuid())
+     date                             DateTime        @default(now()) @unique
+
+     totalViews                       Int             @default(0)
+     prevDayViewsChangePercent        String          @default("0")
+     userCount                        Int             @default(0)
+     paidUserCount                    Int             @default(0)
+     userDelta                        Int             @default(0)
+     paidUserDelta                    Int             @default(0)
+     totalRevenue                     Float           @default(0)
+     totalProfit                      Float           @default(0)
+
+     sources                          PageViewSource[]
+   }
+
+   model PageViewSource {
+     @@id([date, name])
+     name                     String
+     date                     DateTime        @default(now())
+
+     dailyStats               DailyStats?     @relation(fields: [dailyStatsId], references: [id])
+     dailyStatsId             String?
+
+     visitors                 Int
+   }
+
+   model Logs {
+     id                       String          @id @default(uuid())
+     createdAt                DateTime        @default(now())
+
+     message                  String
+     level                    String
+   }
+   ```
+
+   `src/admin/dashboards/analytics/TotalRevenueCard.tsx` orders the stats by subtracting ids, which only works on numbers. Change `weeklyStats.sort((a, b) => b.id - a.id)` to `weeklyStats.sort((a, b) => b.date.getTime() - a.date.getTime())`.
 6. **Spec.** `main.wasp.ts`: `import { analyticsSpec } from "./src/analytics/analytics.wasp";` and add `analyticsSpec` to `spec: [...]`. It declares `getDailyStats` (admins only, so it needs `isAdmin` from the admin dashboard block) and the hourly `calculateDailyStatsJob` on PgBoss.
 7. **Dependency.** Only for Google Analytics stats: `"@google-analytics/data": "4.1.0"`.
 

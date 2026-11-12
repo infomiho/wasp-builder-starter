@@ -1,8 +1,13 @@
 import type { Note } from "wasp/entities";
 import { HttpError } from "wasp/server";
-import type { CreateNote, GetNotes } from "wasp/server/operations";
+import type { CreateNote, DeleteNote, GetNotes } from "wasp/server/operations";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
-import { createNoteInputSchema, type CreateNoteInput } from "./validation";
+import {
+  createNoteInputSchema,
+  deleteNoteInputSchema,
+  type CreateNoteInput,
+  type DeleteNoteInput,
+} from "./validation";
 
 //#region Actions
 export const createNote: CreateNote<CreateNoteInput, Note> = async (
@@ -25,6 +30,25 @@ export const createNote: CreateNote<CreateNoteInput, Note> = async (
       user: { connect: { id: context.user.id } },
     },
   });
+};
+
+export const deleteNote: DeleteNote<DeleteNoteInput, void> = async (
+  rawArgs,
+  context,
+) => {
+  if (!context.user) {
+    throw new HttpError(401);
+  }
+
+  const { id } = ensureArgsSchemaOrThrowHttpError(deleteNoteInputSchema, rawArgs);
+
+  // Matching on the owner as well as the id keeps other people's notes out of reach.
+  const { count: deletedNoteCount } = await context.entities.Note.deleteMany({
+    where: { id, userId: context.user.id },
+  });
+  if (deletedNoteCount === 0) {
+    throw new HttpError(404, "This note no longer exists.");
+  }
 };
 //#endregion
 

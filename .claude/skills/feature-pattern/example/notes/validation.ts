@@ -16,3 +16,9 @@ export const createNoteInputSchema = z.object({
 });
 
 export type CreateNoteInput = z.infer<typeof createNoteInputSchema>;
+
+export const deleteNoteInputSchema = z.object({
+  id: z.uuid(),
+});
+
+export type DeleteNoteInput = z.infer<typeof deleteNoteInputSchema>;
