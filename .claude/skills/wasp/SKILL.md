@@ -5,13 +5,7 @@ description: How Wasp 0.26 works in this app, where the spec is TypeScript (`mai
 
 # Wasp in this app
 
-This app uses Wasp 0.26.1 with a **TypeScript spec**. What you remember of Wasp is most likely the old `main.wasp` language (`query getTasks { fn: import ... }`, `@src/...`, `route X { path: "/", to: Page }`). None of it works here. Write what this page shows.
-
-## The shape of every change
-
-1. **Declare** it in the feature's spec, `src/<feature>/<feature>.wasp.ts`. `main.wasp.ts` only lists the feature specs.
-2. **Implement** it in `src/<feature>/`, typed with the types Wasp generates from the declaration.
-3. **Use** it from React through the `wasp/client/...` imports.
+This app uses Wasp 0.26 with a **TypeScript spec**. The Wasp you remember is most likely the old `main.wasp` language (`query getTasks { fn: import ... }`, `@src/...`, `route X { path: "/", to: Page }`), and none of it compiles here.
 
 ```ts
 // src/notes/notes.wasp.ts
@@ -27,11 +21,20 @@ export const notesSpec: Spec = [
 ];
 ```
 
-- Code from `src/` is imported into a spec file **with `with { type: "ref" }`**, by a path relative to that spec file. Another spec file (`./src/notes/notes.wasp`) or a plain constant is imported without it.
-- `query`, `action`, `job` and `page` take the **imported identifier** first, never a name string or an `fn:` key. The operation's name is the identifier's name. Only `route` and `crud` start with a name string, and `api` starts with the method and path.
-- `route` takes `page(...)` itself as its third argument.
-- Entities are **strings**: `entities: ["Note"]`.
-- A new feature spec is imported in `main.wasp.ts` and added to `spec: [...]`. Without that, nothing in it exists.
+## What breaks the preview
+
+- Code from `src/` is imported into a spec with `with { type: "ref" }`, by a path relative to the spec file. A normal import runs the file and fails the whole spec. Only another spec file or a plain constant takes a normal import.
+- `query`, `action`, `job` and `page` take the imported identifier, `route` takes `page(...)` as its third argument, and entities are strings (`["Note"]`).
+- A feature spec that `main.wasp.ts` does not list in `spec: [...]` does not exist, and nothing reports it.
+- A page file exports the exact name the spec imports. No check catches a mismatch, the page just fails to open.
+- A file that React imports never reaches `wasp/server`, even through another file. What both sides share (zod schemas, constants) lives in a file without that import, like `validation.ts` in the feature pattern.
+- Schema changes only add, because the migration runs unattended on tables that hold rows. A new field is optional or has a default. Renaming, removing or retyping a field fails the migration.
+- Every env variable is optional in its schema. A required one that is missing stops the server from starting.
+- `App.tsx` keeps its `<Outlet />` however the shell is reshaped. Every page renders inside it, so without it no page shows.
+
+## Checking
+
+`npx tsc -p tsconfig.src.json --noEmit` checks `src/` against the types generated from the last spec that compiled. It does not see the spec files, a missing page file or server imports in client code, and while the spec is broken it reports against stale types. Those mistakes show only in the app's own output, which the platform sends when the preview breaks. The first error in that output is the cause and later ones are usually its consequences. [reference/errors.md](reference/errors.md) lists each message with its fix. A database error in the preview mid-turn after a schema change needs no fix. The platform migrates when the turn ends.
 
 ## Where each import comes from
 
@@ -48,34 +51,20 @@ export const notesSpec: Spec = [
 | `env` in React | `wasp/client` |
 | `type AuthUser` | `wasp/auth` |
 
-A file that React imports must never import `wasp/server...`, not even through another file. Keep what both sides share (zod schemas, constants) in a file with no `wasp/server` import, like `validation.ts` in the feature pattern.
-
-## Rules that prevent most broken previews
-
-- Every entity an operation touches through `context.entities` is listed in its `entities`. An action refreshes the queries that list the same entity, so a missing entity also means a stale list.
-- `context.user` can be missing in every operation. Start with `if (!context.user) throw new HttpError(401)`.
-- Call an action directly: `await createNote({ title })`. Only queries go through `useQuery`.
-- A page file must exist with the exported name the spec imports. The type check does not catch a missing page.
-- Write a schema change the database can take: a new field on an existing model is optional or has a default.
-
-## Check your work
-
-`npx tsc -p tsconfig.src.json --noEmit` checks `src/` against the types generated from the last spec that compiled. It does **not** check the spec files, missing page files or server imports in client code. Those show up only in the app's own output, which the platform sends you when the preview breaks. Read that error before changing anything: [reference/errors.md](reference/errors.md) lists each message with its fix.
-
 ## Reference
-
-Open the file for the thing you are about to write.
 
 | File | Open it when you |
 | --- | --- |
-| [reference/spec.md](reference/spec.md) | declare a page, route, query, action, API, job or CRUD, or change `main.wasp.ts`. Has every constructor and the old habits to drop |
+| [reference/errors.md](reference/errors.md) | see an error from the app, the type check or the preview |
+| [reference/spec.md](reference/spec.md) | declare a page, route, query, action, API or job. Has each constructor's arguments and the old habits to drop |
 | [reference/operations.md](reference/operations.md) | write a query or action, or call one from React |
 | [reference/data.md](reference/data.md) | change `schema.prisma` or read and write rows |
-| [reference/auth.md](reference/auth.md) | protect a page or operation, show the signed-in person, change where login leads, or are asked for email or social login |
-| [reference/client.md](reference/client.md) | add a link, a page with an id in its address, an image or change the layout |
+| [reference/auth.md](reference/auth.md) | protect a page, show the signed-in person, or are asked for email or social login |
+| [reference/client.md](reference/client.md) | add a link, a page with an id in its address, an image or a `<head>` tag |
 | [reference/env.md](reference/env.md) | need a secret or a setting from the environment, on the server or in React |
-| [reference/apis-and-jobs.md](reference/apis-and-jobs.md) | need a plain HTTP endpoint (a webhook, a download) or work that runs in the background or on a schedule |
-| [reference/errors.md](reference/errors.md) | see an error from the app, the type check or the preview |
-| [reference/docs.md](reference/docs.md) | need something none of these cover. Lists the exact documentation URLs to fetch |
+| [reference/apis-and-jobs.md](reference/apis-and-jobs.md) | need a plain HTTP endpoint (a webhook, a download), background or scheduled work, or consider `crud` |
 
-For a whole feature that stores data, copy the `feature-pattern` skill's example. This skill explains the Wasp parts underneath it.
+For anything else, https://wasp.sh/llms-0.26.txt indexes every 0.26 documentation page as plain Markdown, and fetching the page beats guessing an API.
+
+- The docs describe a generic Wasp app. Where they differ from this repository or `AGENTS.md`, the repository wins: a spec per feature, named exports, UUID ids, zod 4, no `wasp` or `prisma` commands. A page under `/docs/guides/legacy/` or an example with a `main.wasp` file describes the old language.
+- The types generated for this app beat any page: `.wasp/spec/dist/src/spec/publicApi/waspSpec.d.ts` and `constructors.d.ts` for spec options, `.wasp/out/sdk/wasp/dist/` for everything under `wasp/...`.

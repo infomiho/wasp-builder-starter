@@ -1,16 +1,8 @@
 # What breaks the preview, and the fix
 
-When the app breaks, the platform restarts it and sends you the problem with the end of the app's output. **Read that output first.** It names the file and the line. Find the matching message below, make that one fix, and stop. Retrying the same change, or rewriting the feature, does not help.
+When the app breaks, the platform restarts it and sends the problem with the end of the app's output, which names the file and the line. Each message below has one cause and one fix, so retrying the same change or rewriting the feature does not help.
 
-Three different checks exist, and each sees different mistakes:
-
-| Check | Sees | Does not see |
-| --- | --- | --- |
-| `npx tsc -p tsconfig.src.json --noEmit` (you run it) | type errors in `src/`, wrong `wasp/...` imports, missing entities, links to unknown routes | anything in `*.wasp.ts`, a missing page file, server code imported into React |
-| The spec compile (the running app does it when a `*.wasp.ts` file or `schema.prisma` changes) | every mistake in the spec and the schema | |
-| The page loading in the preview | a missing page file, server code imported into React, runtime errors | |
-
-The types under `wasp/...` are generated from the last spec that compiled. While the spec has an error they are stale, and `tsc` reports old news. Fix the spec error first.
+The types under `wasp/...` come from the last spec that compiled. While the spec has an error, `tsc` reports old news, so the spec error comes first.
 
 ## Spec errors (`Error while analyzing spec (*.wasp.ts) files`)
 
@@ -55,9 +47,4 @@ The types under `wasp/...` are generated from the last spec that compiled. While
 
 ## When the message is not here
 
-1. Read the first error in the output, not the last. Later errors are often its consequences.
-2. Open the file and line it names.
-3. Compare what you wrote with [spec.md](spec.md) or [operations.md](operations.md).
-4. If it is about a Wasp feature this skill does not cover, fetch the page for it from [docs.md](docs.md) before changing code.
-
-Never run `wasp`, `prisma` or a server to investigate, and never edit `.wasp/` or `migrations/`.
+The first error in the output is the cause, and later ones are often its consequences. It names a file and a line to compare with [spec.md](spec.md) or [operations.md](operations.md). For a Wasp feature this skill does not cover, [SKILL.md](../SKILL.md) has the documentation index.
