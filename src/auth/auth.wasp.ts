@@ -14,7 +14,7 @@ export const authConfig: Auth = {
     },
   },
   onAuthFailedRedirectTo: "/login",
-  onAuthSucceededRedirectTo: "/notes",
+  onAuthSucceededRedirectTo: "/",
 };
 
 export const authSpec: Spec = [

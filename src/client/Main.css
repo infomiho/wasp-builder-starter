@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* The agent skills hold example code that is not part of the app, so their class names stay out of the CSS. */
+@source not "../../.claude";
+
 @plugin "@tailwindcss/forms";
 @plugin "tailwindcss-animate";
 

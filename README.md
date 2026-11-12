@@ -1,6 +1,6 @@
 # My app
 
-The starter app for Wasp Builder: [Open SaaS](https://github.com/wasp-lang/open-saas) stripped to its core, on [Wasp](https://wasp.sh) 0.26. It has a landing page, username and password auth, an account page and a small notes feature that shows the full Wasp pattern. It needs no secrets.
+The starter app for Wasp Builder: [Open SaaS](https://github.com/wasp-lang/open-saas) stripped to its core, on [Wasp](https://wasp.sh) 0.26. It has a landing page, username and password auth and an account page. It needs no secrets.
 
 ## Run it
 
@@ -26,5 +26,7 @@ Features removed from Open SaaS come back as agent skills in `.claude/skills/blo
 - `analytics`: Plausible or Google Analytics tracking and daily stats
 - `landing-page`: full marketing sections
 - `ai-example`: an AI day planner on OpenAI
+
+`.claude/skills/feature-pattern/` holds an example feature (notes) that shows the full Wasp pattern for agents to copy. It is not part of the app.
 
 `AGENTS.md` explains the project to coding agents.

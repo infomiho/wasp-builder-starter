@@ -7,7 +7,6 @@ import { seedDemoUser } from "./src/server/scripts/dbSeeds" with { type: "ref" }
 
 import { authConfig, authSpec } from "./src/auth/auth.wasp";
 import { head } from "./src/client/head.wasp";
-import { notesSpec } from "./src/notes/notes.wasp";
 import { APP_NAME } from "./src/shared/common";
 import { userSpec } from "./src/user/user.wasp";
 
@@ -20,7 +19,7 @@ export default app({
   db: {
     // Run `wasp db seed` to seed the database with the seed functions below:
     seeds: [
-      // Creates the demo user shown on the login page, with a few notes.
+      // Creates the demo user shown on the login page.
       seedDemoUser,
     ],
   },
@@ -34,6 +33,5 @@ export default app({
     route("NotFoundRoute", "*", page(NotFoundPage)),
     authSpec,
     userSpec,
-    notesSpec,
   ],
 });

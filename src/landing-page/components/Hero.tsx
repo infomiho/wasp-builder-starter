@@ -33,8 +33,8 @@ function HeroActions() {
     return (
       <div className="mt-10 flex justify-center">
         <Button size="lg" asChild>
-          <WaspRouterLink to={routes.NotesRoute.to}>
-            Open your notes <span aria-hidden="true">→</span>
+          <WaspRouterLink to={routes.AccountRoute.to}>
+            Open your account <span aria-hidden="true">→</span>
           </WaspRouterLink>
         </Button>
       </div>

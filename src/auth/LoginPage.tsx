@@ -13,7 +13,7 @@ export function LoginPage() {
 
   async function logIn(credentials: Credentials) {
     await login(credentials);
-    navigate(routes.NotesRoute.to);
+    navigate(routes.LandingPageRoute.to);
   }
 
   return (

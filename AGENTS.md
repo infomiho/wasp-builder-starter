@@ -11,6 +11,7 @@ A small full-stack app on [Wasp](https://wasp.sh) 0.26 (React, Node.js, Prisma, 
 - **Dependencies are a last resort.** Use what `package.json` already has. When a package is truly needed, add it to `package.json` and explain why. `.npmrc` only accepts versions published at least 7 days ago.
 - **Secrets never block the app.** Declare each one as optional in the zod schema in `src/env.ts`, registered in `main.wasp.ts` as `server: { envValidationSchema }` (the building block skills show how), and read it with `env` from `wasp/server`. When one is missing, the feature still loads and tells the person in plain words what to set up, and the rest of the app keeps working. Keep secrets out of code and out of committed files: they live in the platform's environment settings, or in `.env.server`, which git ignores.
 - **Write for the person.** Interface text is short, plain and in sentence case. Every list has a loading, an empty and an error state.
+- **One shell.** The starter's name (`src/shared/common.ts`), landing page, navigation bar and footer are placeholders. When you build the person's app, replace or reshape them into the app's own shell: rename it, rewrite the landing page for it, and turn `NavBar` and `App.tsx` into the navigation and layout the app needs, such as a sidebar. Never build a second header, sidebar or layout beside the existing one, because both then show at once and the starter's bar floats over the app's.
 - **Off limits:** `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.github/`, `migrations/`, `.wasp/`, `package-lock.json`.
 
 ## Project map
@@ -20,31 +21,31 @@ A small full-stack app on [Wasp](https://wasp.sh) 0.26 (React, Node.js, Prisma, 
 | `main.wasp.ts` | The app spec: name, auth, seeds, and the list of feature specs it combines |
 | `schema.prisma` | Database models (Wasp calls them entities) |
 | `src/shared/common.ts` | The app's name and one-line description |
-| `src/client/App.tsx` | Root layout: navigation bar, color mode, toasts |
+| `src/client/App.tsx` | Root layout, the one shell every page renders in: navigation bar, color mode, toasts |
 | `src/client/Main.css` | Tailwind setup and the theme colors |
 | `src/client/components/ui/` | The UI kit (shadcn/ui, Open SaaS style) |
 | `src/client/components/NavBar/` | Top navigation, `constants.ts` lists its links |
 | `src/landing-page/` | Public home page at `/` (hero, features, footer) |
 | `src/auth/` | Login and signup pages, auth config in `auth.wasp.ts` |
 | `src/user/` | Account page and the user menu (`constants.ts` lists its links) |
-| `src/notes/` | The example feature, a complete Wasp pattern to copy |
 | `src/server/validation.ts` | `ensureArgsSchemaOrThrowHttpError` for validating operation input |
 | `src/shared/format.ts` | `formatDate` and `formatDateTime` for showing dates |
 | `src/server/scripts/dbSeeds.ts` | Demo data created by the seed |
+| `.claude/skills/feature-pattern/` | The pattern for a feature that stores data, with a complete example to copy |
 
 Each feature lives in its own folder with a `<feature>.wasp.ts` spec that `main.wasp.ts` lists in `spec: [...]`.
 
 ## Recipes
 
-`src/notes/` is the reference for all of these. Copy its shape.
+For any feature that stores data, follow the `feature-pattern` skill (`.claude/skills/feature-pattern/SKILL.md`). Its `example/notes/` folder is the reference for all of these. Copy its shape.
 
-- **Entity:** add a model to `schema.prisma` with `id String @id @default(uuid())`, `createdAt DateTime @default(now())` and, when it belongs to a user, `user User @relation(fields: [userId], references: [id], onDelete: Cascade)` plus `userId String`. Add the back relation (`notes Note[]`) to `User`.
+- **Entity:** add a model to `schema.prisma` with `id String @id @default(uuid())`, `createdAt DateTime @default(now())` and, when it belongs to a user, `user User @relation(fields: [userId], references: [id], onDelete: Cascade)` plus `userId String`. Add the back relation (`bookings Booking[]`) to `User`.
 - **Query and action:** write them in `src/<feature>/operations.ts`, typed with the generated types from `wasp/server/operations`. Each one starts with `if (!context.user) throw new HttpError(401)`, validates input with a zod schema through `ensureArgsSchemaOrThrowHttpError`, and only reads or changes rows of `context.user`. Declare them in `<feature>.wasp.ts` with `query(...)` or `action(...)` and the entities they touch.
-- **Page and route:** a component in `src/<feature>/<Name>Page.tsx`, declared with `route("<Name>Route", "/path", page(<Name>Page, { authRequired: true }))`. Call operations from the page through `wasp/client/operations` (`useQuery(getNotes)`, `await createNote(...)`). Wasp refreshes queries that use the same entity after an action. Forms check input with the same zod schema before calling the action and show each message under its field (`NewNoteForm` in `NotesPage.tsx`).
+- **Page and route:** a component in `src/<feature>/<Name>Page.tsx`, declared with `route("<Name>Route", "/path", page(<Name>Page, { authRequired: true }))`. Call operations from the page through `wasp/client/operations` (`useQuery(getBookings)`, `await createBooking(...)`). Wasp refreshes queries that use the same entity after an action. Forms check input with the same zod schema before calling the action and show each message under its field (`NewNoteForm` in the example's `NotesPage.tsx`).
 - **Navigation:** add `{ name, to: routes.<Name>Route.to }` to `src/client/components/NavBar/constants.ts`. Account-related links go in `src/user/constants.ts`.
 - **New feature spec:** import its spec in `main.wasp.ts` and add it to `spec: [...]`.
 
-After signing in, people land on `/notes`. To change that, update `onAuthSucceededRedirectTo` in `src/auth/auth.wasp.ts`, `useRedirectIfLoggedIn`, the login and signup pages, the hero and the 404 page, which all link to `routes.NotesRoute`.
+After signing in, people land on the landing page, because the starter has no page of its own yet. Once the app has a main page, send them there: update `onAuthSucceededRedirectTo` in `src/auth/auth.wasp.ts`, `useRedirectIfLoggedIn`, the login and signup pages and the hero's signed-in button.
 
 ## Name, theme and auth
 

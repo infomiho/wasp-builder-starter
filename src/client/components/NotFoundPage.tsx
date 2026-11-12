@@ -1,10 +1,7 @@
-import { useAuth } from "wasp/client/auth";
 import { Link as WaspRouterLink, routes } from "wasp/client/router";
 import { Button } from "./ui/button";
 
 export function NotFoundPage() {
-  const { data: user } = useAuth();
-
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-6">
       <div className="text-center">
@@ -16,8 +13,8 @@ export function NotFoundPage() {
           This page doesn't exist or has moved.
         </p>
         <Button size="lg" className="mt-8" asChild>
-          <WaspRouterLink to={user ? routes.NotesRoute.to : routes.LandingPageRoute.to}>
-            {user ? "Back to your notes" : "Back to the home page"}
+          <WaspRouterLink to={routes.LandingPageRoute.to}>
+            Back to the home page
           </WaspRouterLink>
         </Button>
       </div>

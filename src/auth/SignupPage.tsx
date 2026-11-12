@@ -13,7 +13,7 @@ export function SignupPage() {
   async function createAccount(credentials: Credentials) {
     await signup(credentials);
     await login(credentials);
-    navigate(routes.NotesRoute.to);
+    navigate(routes.LandingPageRoute.to);
   }
 
   return (

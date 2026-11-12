@@ -91,9 +91,11 @@ export function NavBar({
                 </span>
               </WaspRouterLink>
 
-              <ul className="ml-4 hidden items-center gap-6 lg:flex">
-                {renderNavigationItems(visibleNavigationItems)}
-              </ul>
+              {visibleNavigationItems.length > 0 && (
+                <ul className="ml-4 hidden items-center gap-6 lg:flex">
+                  {renderNavigationItems(visibleNavigationItems)}
+                </ul>
+              )}
             </div>
             <NavBarMobileMenu
               isScrolled={isScrolled}

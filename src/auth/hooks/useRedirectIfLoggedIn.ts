@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "wasp/client/auth";
 import { routes } from "wasp/client/router";
 
-export function useRedirectIfLoggedIn(redirectTo = routes.NotesRoute.to) {
+export function useRedirectIfLoggedIn(redirectTo = routes.LandingPageRoute.to) {
   const { data: user } = useAuth();
   const navigate = useNavigate();
 

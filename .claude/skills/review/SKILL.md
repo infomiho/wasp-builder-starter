@@ -20,7 +20,7 @@ Read every changed line against each rule below. A rule passes only when you hav
 - No commented-out code, debug `console.log`, or placeholder text such as "Lorem ipsum" or "TODO".
 
 **Naming**
-- Names say what a thing is or does in the app's language (`createNote`, `isSaving`, `NoteCard`), and follow the existing pattern: `<Name>Page`, `<Name>Route`, `get<Things>` and `create<Thing>` operations, a `<feature>.wasp.ts` spec per folder.
+- Names say what a thing is or does in the app's language (`createBooking`, `isSaving`, `BookingCard`), and follow the existing pattern: `<Name>Page`, `<Name>Route`, `get<Things>` and `create<Thing>` operations, a `<feature>.wasp.ts` spec per folder.
 
 **Duplication and overengineering**
 - Logic that already exists is reused: UI kit components from `src/client/components/ui`, `cn` from `src/client/utils`, `ensureArgsSchemaOrThrowHttpError`, `formatDate` and `formatDateTime` from `src/shared/format.ts`.
